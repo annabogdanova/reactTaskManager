@@ -33,84 +33,98 @@ var taskList = [
   {
     id: 0,
     name: 'todoitem0',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 1,
     name: 'todoitem1',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 2,
     name: 'todoitem2',
-    categoryId: 2
+    categoryId: 2,
+    done: false
   },
   {
     id: 3,
     name: 'todoitem0',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 4,
     name: 'todoitem1',
-    categoryId: 1
+    categoryId: 1,
+    done: false
   },
   {
     id: 5,
     name: 'todoitem2',
-    categoryId: 2
+    categoryId: 2,
+    done: true
   },
   {
     id: 6,
     name: 'todoitem0',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 7,
     name: 'todoitem1',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 8,
     name: 'todoitem2',
-    categoryId: 2
+    categoryId: 2,
+    done: false
   },
   {
     id: 9,
     name: 'todoitem0',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 10,
     name: 'todoitem1',
-    categoryId: 1
+    categoryId: 1,
+    done: false
   },
   {
     id: 11,
     name: 'todoitem2',
-    categoryId: 2
+    categoryId: 2,
+    done: true
   },
   {
     id: 12,
     name: 'todoitem0',
-    categoryId: 1
+    categoryId: 1,
+    done: true
   },
   {
     id: 13,
     name: 'todoitem1',
-    categoryId: 1
+    categoryId: 1,
+    done: false
   },
   {
     id: 14,
     name: 'todoitem2',
-    categoryId: 2
+    categoryId: 2,
+    done: false
   }
 ];
 
 class App extends React.Component {
   constructor() {
     super();
-    this.state = {activeCategoryId: 0}
   }
 
   render() {
@@ -118,9 +132,9 @@ class App extends React.Component {
       <div className="container-fluid">
         <Header/>
         <div className="row">
-          <Sidebar />
+          <Sidebar categories={GetCategoryList(0)}/>
 
-          <Content activeCategoryId={this.state.activeCategoryId}/>
+          <Content/>
         </div>
       </div>
     )
@@ -143,45 +157,40 @@ class Header extends React.Component {
 }
 
 
-class Sidebar extends React.Component {
-  constructor() {
-    super();
-    this.state = {activeCategoryId: 0};
-  }
-  selectCategory(e) {
-    e.preventDefault();
-    this.setState({activeCategoryId: 1})
-  }
+var Sidebar = React.createClass({
+  getInitialState: function(){
+    return { focused: 0 };
+  },
+
+  clicked: function(index){
+    this.setState({focused: index});
+  },
+
   render() {
+    var self = this;
     return (
       <div className="col-lg-3 col-md-3 col-sm-3 sidebar">
         <input type="text" placeholder="Enter category title" className="inputBox"/>
         <button className="inputBtn">Add</button>
+
         <div className="categoryList">
-          {GetCategoryList(this.state.activeCategoryId).map((elem =>
-            <Category name={elem.name} key={elem.id}
-                      selectCategory={this.selectCategory.bind(this)}/>))}
+          {
+            this.props.categories.map((elem, index) =>
+              <div key={index} className="category" onClick={self.clicked.bind(self, elem.id)}>
+                {elem.name}
+                <span className="glyphicon glyphicon-pencil btnIcon"></span>
+                <div className="ctrlPanel">
+                  <span className="glyphicon glyphicon-trash btnIcon"></span>
+                  <span className="glyphicon glyphicon-plus btnIcon"></span>
+                </div>
+              </div>
+            )
+          }
         </div>
       </div>
     )
   }
-}
-
-class Category extends React.Component {
-  render() {
-    return (
-      <div className="category" onClick={this.props.selectCategory}>
-        {this.props.name}
-        <span className="glyphicon glyphicon-pencil btnIcon"></span>
-        <div className="ctrlPanel">
-          <span className="glyphicon glyphicon-trash btnIcon"></span>
-          <span className="glyphicon glyphicon-plus btnIcon"></span>
-        </div>
-      </div>
-    )
-  }
-}
-
+})
 
 function GetCategoryList(parentId) {
   var list = [];
@@ -193,7 +202,10 @@ function GetCategoryList(parentId) {
 }
 
 
-class Content extends React.Component {
+var Content = React.createClass({
+  getInitialState: function(){
+    return { activeCategoryId: 0 };
+  },
   render() {
     return (
       <div className="col-lg-9 col-md-9 col-sm-9">
@@ -202,27 +214,22 @@ class Content extends React.Component {
           <button className="inputBtn">Add</button>
         </div>
         <div className="taskList">
-          {GetTaskList(this.props.activeCategoryId).map((task => <TaskItem name={task.name} key={task.id}/>))}
+          {
+            GetTaskList(this.state.activeCategoryId).map((task, index) =>
+              <div key={index} className="taskItem">
+                <input type="checkbox"/>
+                <span className="itemName">{task.name}-{task.id}</span>
+                <div className="ctrlPanel">
+                  <span className="glyphicon glyphicon-pencil btnIcon"></span>
+                </div>
+              </div>
+            )
+          }
         </div>
       </div>
     )
   }
-}
-
-class TaskItem extends React.Component {
-  render() {
-    return (
-      <div className="taskItem">
-        <input type="checkbox"/>
-        <span className="itemName">{this.props.name}</span>
-        <div className="ctrlPanel">
-          <span className="glyphicon glyphicon-pencil btnIcon"></span>
-        </div>
-      </div>
-    )
-  }
-}
-
+})
 
 function GetTaskList(categoryId) {
   if (categoryId == 0) {
