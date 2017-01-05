@@ -1,5 +1,6 @@
-import React from 'react';
-import ReactDom from 'react-dom';
+import * as React from 'react';
+import * as ReactDom from 'react-dom';
+import {Router, Route, IndexRoute, browserHistory, Link, IndexLink} from 'react-router';
 
 var categories = [
     {
@@ -34,91 +35,106 @@ var taskList = [
     id: 0,
     name: 'todoitem0',
     categoryId: 1,
-    done: true
+    done: true,
+    description: '123'
   },
   {
     id: 1,
     name: 'todoitem1',
-    categoryId: 1,
-    done: true
+    categoryId: 3,
+    done: true,
+    description: 'dfms;'
   },
   {
     id: 2,
     name: 'todoitem2',
     categoryId: 2,
-    done: false
+    done: false,
+    description: '1ssf23'
   },
   {
     id: 3,
     name: 'todoitem0',
     categoryId: 1,
-    done: true
+    done: true,
+    description: 'dfgthrtj'
   },
   {
     id: 4,
     name: 'todoitem1',
     categoryId: 1,
-    done: false
+    done: false,
+    description: '123hnmj'
   },
   {
     id: 5,
     name: 'todoitem2',
     categoryId: 2,
-    done: true
+    done: true,
+    description: '123 vvf'
   },
   {
     id: 6,
     name: 'todoitem0',
     categoryId: 1,
-    done: true
+    done: true,
+    description: '123345'
   },
   {
     id: 7,
     name: 'todoitem1',
     categoryId: 1,
-    done: true
+    done: true,
+    description: '12er53'
   },
   {
     id: 8,
     name: 'todoitem2',
     categoryId: 2,
-    done: false
+    done: false,
+    description: '123;l;;l;'
   },
   {
     id: 9,
     name: 'todoitem0',
     categoryId: 1,
-    done: true
+    done: true,
+    description: '123    oppop'
   },
   {
     id: 10,
     name: 'todoitem1',
-    categoryId: 1,
-    done: false
+    categoryId: 3,
+    done: false,
+    description: '123bnnbv'
   },
   {
     id: 11,
     name: 'todoitem2',
     categoryId: 2,
-    done: true
+    done: true,
+    description: '123zzz'
   },
   {
     id: 12,
     name: 'todoitem0',
     categoryId: 1,
-    done: true
+    done: true,
+    description: '2345'
   },
   {
     id: 13,
     name: 'todoitem1',
     categoryId: 1,
-    done: false
+    done: false,
+    description: '6679'
   },
   {
     id: 14,
     name: 'todoitem2',
     categoryId: 2,
-    done: false
+    done: false,
+    description: 'qqq'
   }
 ];
 
@@ -134,7 +150,8 @@ class App extends React.Component {
         <div className="row">
           <Sidebar categories={GetCategoryList(0)}/>
 
-          <Content/>
+          {this.props.children}
+
         </div>
       </div>
     )
@@ -146,10 +163,12 @@ class Header extends React.Component {
   render() {
     return (
       <div className="navbar">
-        <span className="logo">To-Do List</span>
+        <IndexLink to="/">
+          <span className="logo">To-Do List</span>
+        </IndexLink>
         <div className="ctrlPanel">
           <input type="checkbox"/> <label className="cbxLabel">Show done</label>
-          <input type="text" placeholder="Search" className="inputBox"/>
+          <input type="text" placeholder="Search" className="inputBox form-control"/>
         </div>
       </div>
     )
@@ -169,15 +188,21 @@ var Sidebar = React.createClass({
   render() {
     var self = this;
     return (
-      <div className="col-lg-3 col-md-3 col-sm-3 sidebar">
-        <input type="text" placeholder="Enter category title" className="inputBox"/>
-        <button className="inputBtn">Add</button>
+      <div className="col-lg-3 col-md-3 col-sm-3">
+
+        <div className="input-group">
+          <input type="text" className="form-control" placeholder="Enter category title" aria-describedby="categoryTitle"/>
+          <span className="input-group-addon" id="categoryTitle">Add</span>
+        </div>
 
         <div className="categoryList">
           {
             this.props.categories.map((elem, index) =>
-              <div key={index} className="category" onClick={self.clicked.bind(self, elem.id)}>
-                {elem.name}
+              <div key={index} className="categoryBlock" onClick={self.clicked.bind(self, elem.id)}>
+                <Link to={{pathname: "category", query: {categoryId: elem.id}}}
+                  className="categoryName" activeClassName="activeCategoryName">
+                  {elem.name}
+                </Link>
                 <span className="glyphicon glyphicon-pencil btnIcon"></span>
                 <div className="ctrlPanel">
                   <span className="glyphicon glyphicon-trash btnIcon"></span>
@@ -202,25 +227,28 @@ function GetCategoryList(parentId) {
 }
 
 
-var Content = React.createClass({
-  getInitialState: function(){
-    return { activeCategoryId: 0 };
-  },
+var TaskList = React.createClass({
   render() {
+    var activeCategory = parseInt(this.props.location.query.categoryId) || 0;
     return (
       <div className="col-lg-9 col-md-9 col-sm-9">
-        <div className="ctrlPanel">
-          <input type="text" placeholder="Text input with button" className="inputBox"/>
-          <button className="inputBtn">Add</button>
+
+        <div className="col-lg-6"/>
+        <div className="col-lg-6 input-group">
+          <input type="text" className="form-control" placeholder="Text input with button" aria-describedby="categoryTitle"/>
+          <span className="input-group-addon" id="categoryTitle">Add</span>
         </div>
+
         <div className="taskList">
           {
-            GetTaskList(this.state.activeCategoryId).map((task, index) =>
+            GetTaskList(activeCategory).map((task, index) =>
               <div key={index} className="taskItem">
-                <input type="checkbox"/>
+                <input type="checkbox" defaultChecked={task.done}/>
                 <span className="itemName">{task.name}-{task.id}</span>
                 <div className="ctrlPanel">
-                  <span className="glyphicon glyphicon-pencil btnIcon"></span>
+                  <Link to={{pathname: "task", query: {taskId: task.id}}}
+                        className="glyphicon glyphicon-pencil btnIcon">
+                  </Link>
                 </div>
               </div>
             )
@@ -233,19 +261,78 @@ var Content = React.createClass({
 
 function GetTaskList(categoryId) {
   if (categoryId == 0) {
-    return taskList;
+    return [];
   } else {
-    var list = [];
-    taskList.forEach((item) => {
-      if (item.categoryId === categoryId)
-        list.push(item);
+    var list = taskList.filter(function(item) {
+      return item.categoryId === categoryId;
     });
     return list;
   }
 }
 
 
+var EditTask = React.createClass ({
+  render() {
+    var task = getTask(parseInt(this.props.location.query.taskId));
+    return (
+      <div>
+        <div className="pull-right">
+          <button className="btn btn-default">Save changes</button>
+          <Link to={{pathname: "category", query: {categoryId: task.categoryId}}}
+                className="btn btn-default">Cancel</Link>
+        </div>
+        <div className="col-md-9">
+          <div className="pull-left">
+            <input type="text" className="form-control" value={task.name}/>
+          </div>
+        </div>
+        <div className="col-md-9">
+          <input type="checkbox" defaultChecked={task.done}/>
+          <label className="cbxLabel">Done</label>
+        </div>
+        <div className="col-md-9">
+          <textarea rows="5" placeholder="Description" className="wide-textarea" value={task.description}/>
+        </div>
+      </div>
+    )
+  }
+})
+
+function getTask(taskId) {
+  var task = taskList.filter(function(item) {
+    return item.id === taskId;
+  });
+  return task[0];
+}
+
+
+class NotFound extends React.Component {
+  constructor() {
+    super();
+  }
+
+  render() {
+    return (
+      <div className="container-fluid">
+        <Header/>
+        <div className="row">
+          <div className="notFound">
+            Not found :(
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
+
 ReactDom.render(
-    <App/>,
-    document.getElementById('app')
+  <Router history={browserHistory}>
+    <Route path="/" component={App}>
+      <Route path="category" component={TaskList} />
+      <Route path="task" component={EditTask} />
+    </Route>
+    <Route path="*" component={NotFound} />
+    </Router>,
+  document.getElementById('app')
 );

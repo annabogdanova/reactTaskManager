@@ -9,12 +9,12 @@
 }
 
 .cbxLabel {
-  margin-right: 10px;
+  margin: 0 10px;
 }
 
 .inputBox {
-  border-radius: 5px 0 0 5px;
-  border-width: 1px;
+  display: inline-block;
+  width: inherit;
 }
 
 .inputBtn {
@@ -34,20 +34,24 @@
   padding: 8px 0;
 }
 
-.sidebar {
-  position: fixed;
-  display: block;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 .categoryList {
   clear: right;
   margin-top: 10px;
 }
 
-.category {
+.categoryBlock {
   margin-bottom: 5px;
+}
+
+.categoryName {
+  color: initial;
+  text-decoration: none;
+}
+
+.activeCategoryName, .categoryName:hover, .categoryName:focus {
+  color: #337ab7;
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .taskList {
@@ -64,4 +68,29 @@
   display: inline-block;
   margin-left: 15px;
   font-size: 18px;
+}
+
+.notFound {
+  text-align: center;
+  color: red;
+  font-size: large;
+}
+
+.inactiveCheckBox {
+  color: #00b3ee;
+}
+
+.wide-textarea {
+  width: 100%;
+  border-radius: 5px;
+  border-color: #dfdfdf;
+  margin-top: 5px;
+}
+
+.pull-right {
+  margin-right: 15px;
+}
+
+.btn {
+  margin-left: 10px;
 }
