@@ -272,26 +272,78 @@ function GetTaskList(categoryId) {
 
 
 var EditTask = React.createClass ({
-  render() {
+  getInitialState: function(){
     var task = getTask(parseInt(this.props.location.query.taskId));
+    return {
+      id: parseInt(this.props.location.query.taskId),
+      categoryId: task.categoryId,
+      name: task.name,
+      done: task.done,
+      description: task.description
+    };
+  },
+
+  changeName(event) {
+    this.setState({name: event.target.value});
+  },
+
+  changeDone(event) {
+    this.setState({done: event.target.checked});
+  },
+
+  changeDescription(event) {
+    this.setState({description: event.target.value});
+  },
+
+  toggleAlertVisibility() {
+    var div = document.getElementById('savedAlert');
+    if (div.style.display == 'none') {
+      div.style.display = 'inline-block';
+    } else {
+      div.style.display = 'none';
+    }
+  },
+
+  handleSubmit(event) {
+    taskList[this.state.id].name = this.state.name;
+    taskList[this.state.id].done = this.state.done;
+    taskList[this.state.id].description = this.state.description;
+
+    this.toggleAlertVisibility();
+
+    event.preventDefault();
+  },
+
+  render() {
     return (
       <div>
-        <div className="pull-right">
-          <button className="btn btn-default">Save changes</button>
-          <Link to={{pathname: "category", query: {categoryId: task.categoryId}}}
-                className="btn btn-default">Cancel</Link>
-        </div>
-        <div className="col-md-9">
-          <div className="pull-left">
-            <input type="text" className="form-control" value={task.name}/>
+        <form onSubmit={this.handleSubmit}>
+          <div className="pull-right">
+            <input type="submit" value="Save changes" className="btn btn-default"/>
+            <Link to={{pathname: "category", query: {categoryId: this.state.categoryId}}}
+                  className="btn btn-default">Cancel</Link>
           </div>
-        </div>
-        <div className="col-md-9">
-          <input type="checkbox" defaultChecked={task.done}/>
-          <label className="cbxLabel">Done</label>
-        </div>
-        <div className="col-md-9">
-          <textarea rows="5" placeholder="Description" className="wide-textarea" value={task.description}/>
+          <div className="col-md-9">
+            <div className="pull-left">
+              <input type="text" className="form-control"
+                     defaultValue={this.state.name} onChange={this.changeName}/>
+            </div>
+          </div>
+          <div className="col-md-9">
+            <input type="checkbox" defaultChecked={this.state.done} onChange={this.changeDone}/>
+            <label className="cbxLabel">Done</label>
+          </div>
+          <div className="col-md-9">
+            <textarea rows="5" placeholder="Description" className="wide-textarea"
+                      defaultValue={this.state.description} onChange={this.changeDescription}/>
+          </div>
+        </form>
+
+        <div id="savedAlert" className="alert alert-info alert-dismissible" role="alert" style={{display:'none'}}>
+          <button type="button" className="close" data-dismiss="alert" aria-label="Close"
+                  onClick={this.toggleAlertVisibility}>
+            <span aria-hidden="true">&times;</span></button>
+          This task was successfully updated!
         </div>
       </div>
     )
