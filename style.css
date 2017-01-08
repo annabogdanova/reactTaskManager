@@ -100,3 +100,9 @@
   bottom: 0;
   margin: 0 26%;
 }
+
+.input-group-submit {
+  border: none;
+  background-color: #eeeeee;
+  outline: none;
+}

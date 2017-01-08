@@ -228,6 +228,23 @@ function GetCategoryList(parentId) {
 
 
 var TaskList = React.createClass({
+  getInitialState: function(){
+    return {taskName: ''}
+  },
+  handleChange(event) {
+    this.setState({taskName: event.target.value})
+  },
+  addTask(event) {
+    taskList.unshift({
+      id: taskList.length,
+      name: this.state.taskName,
+      categoryId: parseInt(this.props.location.query.categoryId),
+      done: false,
+      description: ''
+    });
+    this.setState({taskName: ''});
+    event.preventDefault();
+  },
   render() {
     var activeCategory = parseInt(this.props.location.query.categoryId) || 0;
     return (
@@ -235,8 +252,14 @@ var TaskList = React.createClass({
 
         <div className="col-lg-6"/>
         <div className="col-lg-6 input-group">
-          <input type="text" className="form-control" placeholder="Text input with button" aria-describedby="categoryTitle"/>
-          <span className="input-group-addon" id="categoryTitle">Add</span>
+          <form onSubmit={this.addTask} style={{display: 'table'}}>
+            <input type="text" required className="form-control" value={this.state.taskName}
+                   placeholder="Text input with button" aria-describedby="taskTitle"
+                   onChange={this.handleChange}/>
+            <span className="input-group-addon">
+              <input type="submit" value="Add" id="taskTitle" className="input-group-submit"/>
+            </span>
+          </form>
         </div>
 
         <div className="taskList">
