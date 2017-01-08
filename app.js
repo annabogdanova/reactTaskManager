@@ -167,7 +167,14 @@ class Header extends React.Component {
           <span className="logo">To-Do List</span>
         </IndexLink>
         <div className="ctrlPanel">
-          <input type="checkbox"/> <label className="cbxLabel">Show done</label>
+          <Link to={{
+            pathname: "category",
+            query: {
+              showDone: true
+            }
+            }}>
+            <input type="checkbox" defaultChecked={false}/> <label className="cbxLabel">Show done</label>
+          </Link>
           <input type="text" placeholder="Search" className="inputBox form-control"/>
         </div>
       </div>
@@ -247,6 +254,7 @@ var TaskList = React.createClass({
   },
   render() {
     var activeCategory = parseInt(this.props.location.query.categoryId) || 0;
+    var showDone = this.props.location.query.showDone || false;
     return (
       <div className="col-lg-9 col-md-9 col-sm-9">
 
@@ -264,7 +272,7 @@ var TaskList = React.createClass({
 
         <div className="taskList">
           {
-            GetTaskList(activeCategory).map((task, index) =>
+            GetTaskList(activeCategory, showDone).map((task, index) =>
               <div key={index} className="taskItem">
                 <input type="checkbox" defaultChecked={task.done}/>
                 <span className="itemName">{task.name}-{task.id}</span>
@@ -282,9 +290,14 @@ var TaskList = React.createClass({
   }
 })
 
-function GetTaskList(categoryId) {
-  if (categoryId == 0) {
+function GetTaskList(categoryId, showDone) {
+  if (categoryId == 0 && !showDone) {
     return [];
+  } else if (showDone) {
+    var list = taskList.filter(function(item) {
+      return item.done;
+    });
+    return list;
   } else {
     var list = taskList.filter(function(item) {
       return item.categoryId === categoryId;
