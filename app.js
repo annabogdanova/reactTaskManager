@@ -147,6 +147,8 @@ class App extends React.Component {
     return (
       <div className="container-fluid">
         <Header/>
+        <ProgressBar/>
+
         <div className="row">
           <Sidebar categories={GetCategoryList(0)}/>
 
@@ -169,6 +171,24 @@ class Header extends React.Component {
         <div className="ctrlPanel">
           <input type="checkbox"/> <label className="cbxLabel">Show done</label>
           <input type="text" placeholder="Search" className="inputBox form-control"/>
+        </div>
+      </div>
+    )
+  }
+}
+
+
+class ProgressBar extends React.Component {
+  render() {
+    var list = taskList.filter(function(item) {
+      return item.done;
+    });
+    var done = list.length*100/taskList.length + '%';
+
+    return (
+      <div className="progress">
+        <div className="progress-bar" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
+             style={{width: done}}>
         </div>
       </div>
     )
