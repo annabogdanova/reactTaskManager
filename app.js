@@ -198,10 +198,27 @@ class ProgressBar extends React.Component {
 
 var Sidebar = React.createClass({
   getInitialState: function(){
-    return { focused: 0 };
+    return {
+      focused: 0,
+      categoryTitle: ''
+    };
   },
 
-  clicked: function(index){
+  changeTitle(event) {
+    this.setState({categoryTitle: event.target.value})
+  },
+
+  addCategory(event) {
+    categories.unshift({
+      id: categories.length,
+      parentId: 0,
+      name: this.state.categoryTitle
+    });
+    this.setState({categoryTitle: ''});
+    event.preventDefault();
+  },
+
+  changeFocus: function(index){
     this.setState({focused: index});
   },
 
@@ -211,14 +228,20 @@ var Sidebar = React.createClass({
       <div className="col-lg-3 col-md-3 col-sm-3">
 
         <div className="input-group">
-          <input type="text" className="form-control" placeholder="Enter category title" aria-describedby="categoryTitle"/>
-          <span className="input-group-addon" id="categoryTitle">Add</span>
+          <form onSubmit={this.addCategory} style={{display: 'table'}}>
+            <input type="text" required className="form-control" value={this.state.categoryTitle}
+                   placeholder="Enter category title" aria-describedby="categoryTitle"
+                   onChange={this.changeTitle}/>
+              <span className="input-group-addon">
+                <input type="submit" value="Add" id="categoryTitle" className="input-group-submit"/>
+              </span>
+          </form>
         </div>
 
         <div className="categoryList">
           {
             this.props.categories.map((elem, index) =>
-              <div key={index} className="categoryBlock" onClick={self.clicked.bind(self, elem.id)}>
+              <div key={index} className="categoryBlock" onClick={self.changeFocus.bind(self, elem.id)}>
                 <Link to={{pathname: "category", query: {categoryId: elem.id}}}
                   className="categoryName" activeClassName="activeCategoryName">
                   {elem.name}
