@@ -4,29 +4,34 @@ import {Router, Route, IndexRoute, browserHistory, Link, IndexLink} from 'react-
 
 var categories = [
     {
-        id: 1,
-        parentId: 0,
-        name: 'Category1'
+      id: 1,
+      parentId: 0,
+      name: 'Category1',
+      deleted: false
     },
     {
-        id: 2,
-        parentId: 0,
-        name: 'Category2'
+      id: 2,
+      parentId: 0,
+      name: 'Category2',
+      deleted: false
     },
     {
-        id: 3,
-        parentId: 0,
-        name: 'Category3'
+      id: 3,
+      parentId: 0,
+      name: 'Category3',
+      deleted: false
     },
     {
-        id: 4,
-        parentId: 3,
-        name: 'SubCategory1'
+      id: 4,
+      parentId: 1,
+      name: 'SubCategory1',
+      deleted: false
     },
     {
-        id: 5,
-        parentId: 3,
-        name: 'SubCategory2'
+      id: 5,
+      parentId: 2,
+      name: 'SubCategory2',
+      deleted: false
     }
 ];
 
@@ -150,7 +155,7 @@ class App extends React.Component {
         <ProgressBar/>
 
         <div className="row">
-          <Sidebar categories={GetCategoryList(0)}/>
+          <Sidebar/>
 
           {this.props.children}
 
@@ -215,6 +220,7 @@ class ProgressBar extends React.Component {
 var Sidebar = React.createClass({
   getInitialState: function(){
     return {
+      categories: GetCategoryList(0),
       focused: 0,
       categoryTitle: ''
     };
@@ -238,6 +244,14 @@ var Sidebar = React.createClass({
     this.setState({focused: index});
   },
 
+  deleteCategory(category) {
+    var idx = categories.indexOf(category);
+    category.deleted = true;
+    categories.splice(idx, 1, category);
+
+    this.setState({ categories: GetCategoryList(0) });
+  },
+
   render() {
     var self = this;
     return (
@@ -256,15 +270,15 @@ var Sidebar = React.createClass({
 
         <div className="categoryList">
           {
-            this.props.categories.map((elem, index) =>
-              <div key={index} className="categoryBlock" onClick={self.changeFocus.bind(self, elem.id)}>
-                <Link to={{pathname: "category", query: {categoryId: elem.id}}}
+            this.state.categories.map((elem, index) =>
+              <div key={index} className="categoryBlock">
+                <Link to={{pathname: "category", query: {categoryId: elem.id}}} onClick={self.changeFocus.bind(self, elem.id)}
                   className="categoryName" activeClassName="activeCategoryName">
                   {elem.name}
                 </Link>
                 <span className="glyphicon glyphicon-pencil btnIcon"></span>
                 <div className="ctrlPanel">
-                  <span className="glyphicon glyphicon-trash btnIcon"></span>
+                  <span className="glyphicon glyphicon-trash btnIcon" onClick={this.deleteCategory.bind(self, elem)}></span>
                   <span className="glyphicon glyphicon-plus btnIcon"></span>
                 </div>
               </div>
@@ -279,7 +293,7 @@ var Sidebar = React.createClass({
 function GetCategoryList(parentId) {
   var list = [];
   categories.forEach((category) => {
-    if (category.parentId === parentId)
+    if (category.parentId === parentId && category.deleted == false)
       list.push(category);
   });
   return list;
