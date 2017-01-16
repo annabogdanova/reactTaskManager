@@ -161,7 +161,10 @@ class App extends React.Component {
 }
 
 
-class Header extends React.Component {
+var Header = React.createClass ({
+  toggleShowDone () {
+
+  },
   render() {
     return (
       <div className="navbar">
@@ -169,13 +172,26 @@ class Header extends React.Component {
           <span className="logo">To-Do List</span>
         </IndexLink>
         <div className="ctrlPanel">
-          <input type="checkbox"/> <label className="cbxLabel">Show done</label>
+          <ShowDone checked={ false } toggleTaskStatus={ this.toggleShowDone }/>
           <input type="text" placeholder="Search" className="inputBox form-control"/>
         </div>
       </div>
     )
   }
-}
+});
+
+const ShowDone = function(props) {
+  const onToggleCheckbox = ( checked ) => {
+    props.toggleTaskStatus( checked )
+  };
+
+  return(
+    <div style={{display: 'inline-block'}}>
+      <Checkbox checked={ props.checked } onChange={ onToggleCheckbox } />
+      <label className="cbxLabel">Show done</label>
+    </div>
+  )
+};
 
 
 class ProgressBar extends React.Component {
@@ -258,7 +274,7 @@ var Sidebar = React.createClass({
       </div>
     )
   }
-})
+});
 
 function GetCategoryList(parentId) {
   var list = [];
@@ -270,7 +286,7 @@ function GetCategoryList(parentId) {
 }
 
 
-var TaskList = React.createClass({
+var TaskListContainer = React.createClass({
   getInitialState: function(){
     return {taskName: ''}
   },
@@ -288,8 +304,16 @@ var TaskList = React.createClass({
     this.setState({taskName: ''});
     event.preventDefault();
   },
+  toggleTaskStatus (task, isChecked) {
+    var idx = taskList.indexOf(task);
+
+    task.done = isChecked;
+    taskList.splice(idx, 1, task);
+    this.forceUpdate();
+  },
+
   render() {
-    var activeCategory = parseInt(this.props.location.query.categoryId) || 0;
+    var curTaskList = GetTaskList(parseInt(this.props.location.query.categoryId) || 0);
     return (
       <div className="col-lg-9 col-md-9 col-sm-9">
 
@@ -305,25 +329,58 @@ var TaskList = React.createClass({
           </form>
         </div>
 
-        <div className="taskList">
-          {
-            GetTaskList(activeCategory).map((task, index) =>
-              <div key={index} className="taskItem">
-                <input type="checkbox" defaultChecked={task.done}/>
-                <span className="itemName">{task.name}-{task.id}</span>
-                <div className="ctrlPanel">
-                  <Link to={{pathname: "task", query: {taskId: task.id}}}
-                        className="glyphicon glyphicon-pencil btnIcon">
-                  </Link>
-                </div>
-              </div>
-            )
-          }
-        </div>
+        <TaskList tasks={ curTaskList } toggleTaskStatus={ this.toggleTaskStatus } />
       </div>
     )
   }
-})
+});
+
+class TaskList extends React.Component {
+  render() {
+    return (
+      <div className="taskList">
+        {
+          this.props.tasks.map((task, index) =>
+            <Task task={ task } key={ index } toggleTaskStatus={ this.props.toggleTaskStatus } />
+          )
+        }
+      </div>
+    )
+  }
+}
+
+const Task = function(props) {
+  const onToggleCheckbox = ( checked ) => {
+    props.toggleTaskStatus( props.task, checked )
+  };
+
+  return(
+    <div  className="taskItem">
+
+      <Checkbox checked={ props.task.done } onChange={ onToggleCheckbox } />
+
+      <span className="itemName">{props.task.name}-{props.task.id}</span>
+      <div className="ctrlPanel">
+        <Link to={{pathname: "task", query: {taskId: props.task.id}}}
+              className="glyphicon glyphicon-pencil btnIcon">
+        </Link>
+      </div>
+    </div>
+  )
+};
+
+var Checkbox = React.createClass ({
+
+  toggleCheckbox() {
+    this.props.onChange( !this.props.checked )
+  },
+
+  render() {
+    return (
+      <input type="checkbox" checked={ this.props.checked } onClick={ this.toggleCheckbox } />
+    )
+  }
+});
 
 function GetTaskList(categoryId) {
   if (categoryId == 0) {
@@ -353,8 +410,8 @@ var EditTask = React.createClass ({
     this.setState({name: event.target.value});
   },
 
-  changeDone(event) {
-    this.setState({done: event.target.checked});
+  toggleTaskStatus (isChecked) {
+    this.setState({done: isChecked});
   },
 
   changeDescription(event) {
@@ -395,10 +452,7 @@ var EditTask = React.createClass ({
                      defaultValue={this.state.name} onChange={this.changeName}/>
             </div>
           </div>
-          <div className="col-md-9">
-            <input type="checkbox" defaultChecked={this.state.done} onChange={this.changeDone}/>
-            <label className="cbxLabel">Done</label>
-          </div>
+          <DoneStatus checked={ this.state.done } toggleTaskStatus={ this.toggleTaskStatus }/>
           <div className="col-md-9">
             <textarea rows="5" placeholder="Description" className="wide-textarea"
                       defaultValue={this.state.description} onChange={this.changeDescription}/>
@@ -414,7 +468,20 @@ var EditTask = React.createClass ({
       </div>
     )
   }
-})
+});
+
+const DoneStatus = function(props) {
+  const onToggleCheckbox = ( checked ) => {
+    props.toggleTaskStatus( checked )
+  };
+
+  return(
+    <div className="col-md-9">
+      <Checkbox checked={ props.checked } onChange={ onToggleCheckbox } />
+      <label className="cbxLabel">Done</label>
+    </div>
+  )
+};
 
 function getTask(taskId) {
   var task = taskList.filter(function(item) {
@@ -447,7 +514,7 @@ class NotFound extends React.Component {
 ReactDom.render(
   <Router history={browserHistory}>
     <Route path="/" component={App}>
-      <Route path="category" component={TaskList} />
+      <Route path="category" component={TaskListContainer} />
       <Route path="task" component={EditTask} />
     </Route>
     <Route path="*" component={NotFound} />
